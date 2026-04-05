@@ -1,0 +1,9 @@
+{
+  "skipToMainContent": "メインコンテンツへスキップ",
+  "skipToContent": "メインコンテンツへスキップ",
+  "closeSidebar": "サイドバーを閉じる",
+  "documentation": "ドキュメント",
+  "instanceSettings": "インスタンス設定",
+  "toggleTheme": "テーマを切り替え",
+  "switchThemeMode": "{{theme}} モードに切り替え"
+}

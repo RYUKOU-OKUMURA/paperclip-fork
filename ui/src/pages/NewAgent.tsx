@@ -29,6 +29,7 @@ import {
 } from "@paperclipai/adapter-codex-local";
 import { DEFAULT_CURSOR_LOCAL_MODEL } from "@paperclipai/adapter-cursor-local";
 import { DEFAULT_GEMINI_LOCAL_MODEL } from "@paperclipai/adapter-gemini-local";
+import { formatErrorForUser } from "../lib/formatErrorForUser";
 
 function createValuesForAdapterType(
   adapterType: CreateConfigValues["adapterType"],
@@ -127,7 +128,7 @@ export function NewAgent() {
       navigate(agentUrl(result.agent));
     },
     onError: (error) => {
-      setFormError(error instanceof Error ? error.message : "Failed to create agent");
+      setFormError(formatErrorForUser(error));
     },
   });
 

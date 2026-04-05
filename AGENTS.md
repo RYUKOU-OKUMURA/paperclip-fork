@@ -137,6 +137,7 @@ When adding endpoints:
 - Keep routes and nav aligned with available API surface
 - Use company selection context for company-scoped pages
 - Surface failures clearly; do not silently ignore API errors
+- Board UI copy is Japanese-first: add user-visible strings via `react-i18next` (`t('ns:key')`) and `ui/src/locales/ja/*.json`, not hardcoded English in components
 
 ## 10. Definition of Done
 

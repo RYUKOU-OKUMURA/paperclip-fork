@@ -1,0 +1,22 @@
+{
+  "title": "会社",
+  "breadcrumb": "会社",
+  "failedToLoad": "会社一覧を読み込めませんでした",
+  "newCompany": "新しい会社",
+  "loading": "会社を読み込み中…",
+  "rename": "名前を変更",
+  "deleteCompany": "会社を削除",
+  "agentCount": "{{count}} 人のエージェント",
+  "issueCount": "{{count}} 件の課題",
+  "unlimitedBudget": "予算上限なし",
+  "createdAt": "作成 {{time}}",
+  "deleteConfirm": "この会社と関連データをすべて削除しますか？この操作は取り消せません。",
+  "cancel": "キャンセル",
+  "delete": "削除",
+  "deleting": "削除中…",
+  "status": {
+    "active": "有効",
+    "paused": "一時停止",
+    "archived": "アーカイブ"
+  }
+}

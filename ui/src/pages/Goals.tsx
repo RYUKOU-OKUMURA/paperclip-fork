@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { goalsApi } from "../api/goals";
 import { useCompany } from "../context/CompanyContext";
@@ -10,15 +11,17 @@ import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Target, Plus } from "lucide-react";
+import { formatErrorForUser } from "../lib/formatErrorForUser";
 
 export function Goals() {
+  const { t } = useTranslation("admin");
   const { selectedCompanyId } = useCompany();
   const { openNewGoal } = useDialog();
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
-    setBreadcrumbs([{ label: "Goals" }]);
-  }, [setBreadcrumbs]);
+    setBreadcrumbs([{ label: t("goals.breadcrumb") }]);
+  }, [setBreadcrumbs, t]);
 
   const { data: goals, isLoading, error } = useQuery({
     queryKey: queryKeys.goals.list(selectedCompanyId!),
@@ -27,7 +30,7 @@ export function Goals() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Target} message="Select a company to view goals." />;
+    return <EmptyState icon={Target} message={t("goals.selectCompany")} />;
   }
 
   if (isLoading) {
@@ -36,13 +39,13 @@ export function Goals() {
 
   return (
     <div className="space-y-4">
-      {error && <p className="text-sm text-destructive">{error.message}</p>}
+      {error && <p className="text-sm text-destructive">{formatErrorForUser(error)}</p>}
 
       {goals && goals.length === 0 && (
         <EmptyState
           icon={Target}
-          message="No goals yet."
-          action="Add Goal"
+          message={t("goals.emptyMessage")}
+          action={t("goals.addGoal")}
           onAction={() => openNewGoal()}
         />
       )}

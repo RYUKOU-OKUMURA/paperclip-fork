@@ -1,0 +1,20 @@
+{
+  "selectCompany": "会社を選択",
+  "newIssue": "新しい課題",
+  "dashboard": "ダッシュボード",
+  "inbox": "受信箱",
+  "home": "ホーム",
+  "issues": "課題",
+  "create": "作成",
+  "agents": "エージェント",
+  "sectionWork": "作業",
+  "routines": "ルーティン",
+  "goals": "ゴール",
+  "sectionCompany": "会社",
+  "org": "組織",
+  "skills": "スキル",
+  "costs": "コスト",
+  "activity": "アクティビティ",
+  "settings": "設定",
+  "mobileNavAria": "モバイルナビゲーション"
+}

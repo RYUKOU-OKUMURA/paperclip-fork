@@ -1,0 +1,23 @@
+{
+  "save": "保存",
+  "cancel": "キャンセル",
+  "create": "作成",
+  "delete": "削除",
+  "edit": "編集",
+  "close": "閉じる",
+  "back": "戻る",
+  "next": "次へ",
+  "submit": "送信",
+  "retry": "再試行",
+  "copy": "コピー",
+  "view": "表示",
+  "viewDetails": "詳細を見る",
+  "signIn": "サインイン",
+  "signOut": "サインアウト",
+  "createAccount": "アカウントを作成",
+  "newIssue": "新しい課題",
+  "createIssue": "課題を作成",
+  "filter": "フィルター",
+  "sort": "並び替え",
+  "refresh": "更新"
+}

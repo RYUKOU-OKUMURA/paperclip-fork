@@ -5,6 +5,7 @@
  * @see PLUGIN_SPEC.md §9 — Plugin Marketplace / Manager
  */
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PluginRecord } from "@paperclipai/shared";
 import { Link } from "@/lib/router";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/context/ToastContext";
 import { cn } from "@/lib/utils";
+import { formatErrorForUser } from "@/lib/formatErrorForUser";
 
 function firstNonEmptyLine(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -39,8 +41,8 @@ function firstNonEmptyLine(value: string | null | undefined): string | null {
   return line ?? null;
 }
 
-function getPluginErrorSummary(plugin: PluginRecord): string {
-  return firstNonEmptyLine(plugin.lastError) ?? "Plugin entered an error state without a stored error message.";
+function getPluginErrorSummary(plugin: PluginRecord, fallback: string): string {
+  return firstNonEmptyLine(plugin.lastError) ?? fallback;
 }
 
 /**
@@ -61,6 +63,7 @@ function getPluginErrorSummary(plugin: PluginRecord): string {
  * @see doc/plugins/PLUGIN_SPEC.md §3 — Plugin Lifecycle for status semantics.
  */
 export function PluginManager() {
+  const { t } = useTranslation("admin");
   const { selectedCompany } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
@@ -74,11 +77,11 @@ export function PluginManager() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
-      { label: "Settings", href: "/instance/settings/heartbeats" },
-      { label: "Plugins" },
+      { label: selectedCompany?.name ?? t("plugins.companyFallback"), href: "/dashboard" },
+      { label: t("plugins.settingsBreadcrumb"), href: "/instance/settings/heartbeats" },
+      { label: t("plugins.breadcrumb") },
     ]);
-  }, [selectedCompany?.name, setBreadcrumbs]);
+  }, [selectedCompany?.name, setBreadcrumbs, t]);
 
   const { data: plugins, isLoading, error } = useQuery({
     queryKey: queryKeys.plugins.all,
@@ -150,20 +153,23 @@ export function PluginManager() {
   const errorSummaryByPluginId = useMemo(
     () =>
       new Map(
-        installedPlugins.map((plugin) => [plugin.id, getPluginErrorSummary(plugin)])
+        installedPlugins.map((plugin) => [
+          plugin.id,
+          getPluginErrorSummary(plugin, t("plugins.errorStateNoMessage")),
+        ]),
       ),
-    [installedPlugins]
+    [installedPlugins, t],
   );
 
-  if (isLoading) return <div className="p-4 text-sm text-muted-foreground">Loading plugins...</div>;
-  if (error) return <div className="p-4 text-sm text-destructive">Failed to load plugins.</div>;
+  if (isLoading) return <div className="p-4 text-sm text-muted-foreground">{t("plugins.loading")}</div>;
+  if (error) return <div className="p-4 text-sm text-destructive">{formatErrorForUser(error)}</div>;
 
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Puzzle className="h-6 w-6 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">Plugin Manager</h1>
+          <h1 className="text-xl font-semibold">{t("plugins.managerTitle")}</h1>
         </div>
         
         <Dialog open={installDialogOpen} onOpenChange={setInstallDialogOpen}>
@@ -485,7 +491,9 @@ export function PluginManager() {
                     What errored
                   </p>
                   <p className="text-red-700/90 dark:text-red-200/90 break-words">
-                    {errorDetailsPlugin ? getPluginErrorSummary(errorDetailsPlugin) : "No error summary available."}
+                    {errorDetailsPlugin
+                      ? getPluginErrorSummary(errorDetailsPlugin, t("plugins.errorStateNoMessage"))
+                      : t("plugins.errorStateNoMessage")}
                   </p>
                 </div>
               </div>

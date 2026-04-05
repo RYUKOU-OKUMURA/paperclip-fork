@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import "../i18n";
 import { describe, expect, it, vi } from "vitest";
 import { __liveUpdatesTestUtils } from "./LiveUpdatesProvider";
 import { queryKeys } from "../lib/queryKeys";
@@ -169,7 +170,7 @@ describe("LiveUpdatesProvider run lifecycle toasts", () => {
         "company-1",
       ),
     ).toMatchObject({
-      title: "CodexCoder errored",
+      title: "CodexCoder でエラーが発生しました",
       body: "Software Engineer",
       tone: "error",
     });
@@ -185,7 +186,7 @@ describe("LiveUpdatesProvider run lifecycle toasts", () => {
         () => "CodexCoder",
       ),
     ).toMatchObject({
-      title: "CodexCoder run failed",
+      title: "CodexCoder の実行が失敗しました",
       body: "boom",
       tone: "error",
     });

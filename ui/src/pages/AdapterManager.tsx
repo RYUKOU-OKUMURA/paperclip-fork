@@ -5,6 +5,7 @@
  * They just register a ServerAdapterModule that provides model discovery and execution.
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Cpu, Plus, Power, Trash2, FolderOpen, Package, RefreshCw, Download } from "lucide-react";
 import { useCompany } from "@/context/CompanyContext";
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { ChoosePathButton } from "@/components/PathInstructionsModal";
 import { invalidateDynamicParser } from "@/adapters/dynamic-loader";
 import { invalidateConfigSchemaCache } from "@/adapters/schema-config-fields";
+import { formatErrorForUser } from "@/lib/formatErrorForUser";
 
 function AdapterRow({
   adapter,
@@ -66,6 +68,7 @@ function AdapterRow({
   toggleTitleDisabled?: string;
   disabledBadgeLabel?: string;
 }) {
+  const { t } = useTranslation("admin");
   return (
     <li>
       <div className="flex items-center gap-4 px-4 py-3">
@@ -74,11 +77,11 @@ function AdapterRow({
             <span className={cn("font-medium", adapter.disabled && "text-muted-foreground line-through")}>
               {adapter.label || getAdapterLabel(adapter.type)}
             </span>
-            <Badge variant="outline">{adapter.source === "external" ? "External" : "Built-in"}</Badge>
+            <Badge variant="outline">{adapter.source === "external" ? t("adapters.external") : t("adapters.builtin")}</Badge>
             {adapter.source === "external" && (
               adapter.isLocalPath
-                ? <span title="Installed from local path"><FolderOpen className="h-4 w-4 text-amber-500" /></span>
-                : <span title="Installed from npm"><Package className="h-4 w-4 text-red-500" /></span>
+                ? <span title={t("adapters.fromLocalPath")}><FolderOpen className="h-4 w-4 text-amber-500" /></span>
+                : <span title={t("adapters.fromNpm")}><Package className="h-4 w-4 text-red-500" /></span>
             )}
             {adapter.version && (
               <Badge variant="secondary" className="font-mono text-[10px]">
@@ -87,17 +90,17 @@ function AdapterRow({
             )}
             {adapter.overriddenBuiltin && (
               <Badge variant="secondary" className="text-blue-600 border-blue-400">
-                Overrides built-in
+                {t("adapters.overridesBuiltin")}
               </Badge>
             )}
             {overriddenBy && (
               <Badge variant="secondary" className="text-blue-600 border-blue-400">
-                Overridden by {overriddenBy}
+                {t("adapters.overriddenBy", { name: overriddenBy })}
               </Badge>
             )}
             {adapter.disabled && (
               <Badge variant="secondary" className="text-amber-600 border-amber-400">
-                {disabledBadgeLabel ?? "Hidden from menus"}
+                {disabledBadgeLabel ?? t("adapters.hiddenFromMenus")}
               </Badge>
             )}
           </div>
@@ -106,7 +109,7 @@ function AdapterRow({
             {adapter.packageName && adapter.packageName !== adapter.type && (
               <> · {adapter.packageName}</>
             )}
-            {" · "}{adapter.modelsCount} models
+            {" · "}{t("adapters.modelsCount", { count: adapter.modelsCount })}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -115,7 +118,7 @@ function AdapterRow({
               variant="outline"
               size="icon-sm"
               className="h-8 w-8"
-              title="Reinstall adapter (pull latest from npm)"
+              title={t("adapters.reinstallTitle")}
               disabled={isReinstalling}
               onClick={() => onReinstall(adapter.type)}
             >
@@ -127,7 +130,7 @@ function AdapterRow({
               variant="outline"
               size="icon-sm"
               className="h-8 w-8"
-              title="Reload adapter (hot-swap)"
+              title={t("adapters.reloadTitle")}
               disabled={isReloading}
               onClick={() => onReload(adapter.type)}
             >
@@ -139,8 +142,8 @@ function AdapterRow({
             size="icon-sm"
             className="h-8 w-8"
             title={adapter.disabled
-              ? (toggleTitleEnabled ?? "Show in agent menus")
-              : (toggleTitleDisabled ?? "Hide from agent menus")}
+              ? (toggleTitleEnabled ?? t("adapters.toggleShowMenus"))
+              : (toggleTitleDisabled ?? t("adapters.toggleHideMenus"))}
             disabled={isToggling}
             onClick={() => onToggle(adapter.type, !adapter.disabled)}
           >
@@ -151,7 +154,7 @@ function AdapterRow({
               variant="outline"
               size="icon-sm"
               className="h-8 w-8 text-destructive hover:text-destructive"
-              title="Remove adapter"
+              title={t("adapters.removeAdapter")}
               onClick={() => onRemove(adapter.type)}
             >
               <Trash2 className="h-4 w-4" />
@@ -252,6 +255,7 @@ function ReinstallDialog({
 }
 
 export function AdapterManager() {
+  const { t } = useTranslation("admin");
   const { selectedCompany } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
@@ -266,11 +270,11 @@ export function AdapterManager() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
-      { label: "Settings", href: "/instance/settings/general" },
-      { label: "Adapters" },
+      { label: selectedCompany?.name ?? t("adapters.companyFallback"), href: "/dashboard" },
+      { label: t("adapters.settingsBreadcrumb"), href: "/instance/settings/general" },
+      { label: t("adapters.breadcrumb") },
     ]);
-  }, [selectedCompany?.name, setBreadcrumbs]);
+  }, [selectedCompany?.name, setBreadcrumbs, t]);
 
   const { data: adapters, isLoading } = useQuery({
     queryKey: queryKeys.adapters.all,
@@ -297,7 +301,7 @@ export function AdapterManager() {
       });
     },
     onError: (err: Error) => {
-      pushToast({ title: "Install failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastInstallFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 
@@ -308,7 +312,7 @@ export function AdapterManager() {
       pushToast({ title: "Adapter removed", tone: "success" });
     },
     onError: (err: Error) => {
-      pushToast({ title: "Removal failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastRemoveFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 
@@ -319,7 +323,7 @@ export function AdapterManager() {
       invalidate();
     },
     onError: (err: Error) => {
-      pushToast({ title: "Toggle failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastToggleFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 
@@ -330,7 +334,7 @@ export function AdapterManager() {
       invalidate();
     },
     onError: (err: Error) => {
-      pushToast({ title: "Override toggle failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastOverrideFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 
@@ -347,7 +351,7 @@ export function AdapterManager() {
       });
     },
     onError: (err: Error) => {
-      pushToast({ title: "Reload failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastReloadFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 
@@ -364,7 +368,7 @@ export function AdapterManager() {
       });
     },
     onError: (err: Error) => {
-      pushToast({ title: "Reinstall failed", body: err.message, tone: "error" });
+      pushToast({ title: t("adapters.toastReinstallFailedTitle"), body: formatErrorForUser(err), tone: "error" });
     },
   });
 

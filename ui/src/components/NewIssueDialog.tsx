@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { pickTextColorForSolidBg } from "@/lib/color-contrast";
 import { useDialog } from "../context/DialogContext";
@@ -54,6 +55,7 @@ import { issueStatusText, issueStatusTextDefault, priorityColor, priorityColorDe
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
+import { formatErrorForUser } from "../lib/formatErrorForUser";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -86,32 +88,6 @@ type StagedIssueFile = {
 
 const ISSUE_OVERRIDE_ADAPTER_TYPES = new Set(["claude_local", "codex_local", "opencode_local"]);
 const STAGED_FILE_ACCEPT = "image/*,application/pdf,text/plain,text/markdown,application/json,text/csv,text/html,.md,.markdown";
-
-const ISSUE_THINKING_EFFORT_OPTIONS = {
-  claude_local: [
-    { value: "", label: "Default" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-  ],
-  codex_local: [
-    { value: "", label: "Default" },
-    { value: "minimal", label: "Minimal" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "xhigh", label: "X-High" },
-  ],
-  opencode_local: [
-    { value: "", label: "Default" },
-    { value: "minimal", label: "Minimal" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "xhigh", label: "X-High" },
-    { value: "max", label: "Max" },
-  ],
-} as const;
 
 function buildAssigneeAdapterOverrides(input: {
   adapterType: string | null | undefined;
@@ -219,27 +195,6 @@ function formatFileSize(file: File) {
   return `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const statuses = [
-  { value: "backlog", label: "Backlog", color: issueStatusText.backlog ?? issueStatusTextDefault },
-  { value: "todo", label: "Todo", color: issueStatusText.todo ?? issueStatusTextDefault },
-  { value: "in_progress", label: "In Progress", color: issueStatusText.in_progress ?? issueStatusTextDefault },
-  { value: "in_review", label: "In Review", color: issueStatusText.in_review ?? issueStatusTextDefault },
-  { value: "done", label: "Done", color: issueStatusText.done ?? issueStatusTextDefault },
-];
-
-const priorities = [
-  { value: "critical", label: "Critical", icon: AlertTriangle, color: priorityColor.critical ?? priorityColorDefault },
-  { value: "high", label: "High", icon: ArrowUp, color: priorityColor.high ?? priorityColorDefault },
-  { value: "medium", label: "Medium", icon: Minus, color: priorityColor.medium ?? priorityColorDefault },
-  { value: "low", label: "Low", icon: ArrowDown, color: priorityColor.low ?? priorityColorDefault },
-];
-
-const EXECUTION_WORKSPACE_MODES = [
-  { value: "shared_workspace", label: "Project default" },
-  { value: "isolated_workspace", label: "New isolated workspace" },
-  { value: "reuse_existing", label: "Reuse existing workspace" },
-] as const;
-
 function defaultProjectWorkspaceIdForProject(project: { workspaces?: Array<{ id: string; isPrimary: boolean }>; executionWorkspacePolicy?: { defaultProjectWorkspaceId?: string | null } | null } | null | undefined) {
   if (!project) return "";
   return project.executionWorkspacePolicy?.defaultProjectWorkspaceId
@@ -271,6 +226,63 @@ function issueExecutionWorkspaceModeForExistingWorkspace(mode: string | null | u
 }
 
 export function NewIssueDialog() {
+  const { t } = useTranslation(["issues", "status", "issuesList"]);
+  const issueThinkingEffortOptions = useMemo(
+    () => ({
+      claude_local: [
+        { value: "", label: t("status:thinking.default") },
+        { value: "low", label: t("status:thinking.low") },
+        { value: "medium", label: t("status:thinking.medium") },
+        { value: "high", label: t("status:thinking.high") },
+      ],
+      codex_local: [
+        { value: "", label: t("status:thinking.default") },
+        { value: "minimal", label: t("status:thinking.minimal") },
+        { value: "low", label: t("status:thinking.low") },
+        { value: "medium", label: t("status:thinking.medium") },
+        { value: "high", label: t("status:thinking.high") },
+        { value: "xhigh", label: t("status:thinking.xhigh") },
+      ],
+      opencode_local: [
+        { value: "", label: t("status:thinking.default") },
+        { value: "minimal", label: t("status:thinking.minimal") },
+        { value: "low", label: t("status:thinking.low") },
+        { value: "medium", label: t("status:thinking.medium") },
+        { value: "high", label: t("status:thinking.high") },
+        { value: "xhigh", label: t("status:thinking.xhigh") },
+        { value: "max", label: t("status:thinking.max") },
+      ],
+    }),
+    [t],
+  );
+  const statusOptions = useMemo(
+    () => [
+      { value: "backlog", label: t("issuesList:statusLabel.backlog"), color: issueStatusText.backlog ?? issueStatusTextDefault },
+      { value: "todo", label: t("issuesList:statusLabel.todo"), color: issueStatusText.todo ?? issueStatusTextDefault },
+      { value: "in_progress", label: t("issuesList:statusLabel.in_progress"), color: issueStatusText.in_progress ?? issueStatusTextDefault },
+      { value: "in_review", label: t("issuesList:statusLabel.in_review"), color: issueStatusText.in_review ?? issueStatusTextDefault },
+      { value: "done", label: t("issuesList:statusLabel.done"), color: issueStatusText.done ?? issueStatusTextDefault },
+    ],
+    [t],
+  );
+  const priorityOptions = useMemo(
+    () => [
+      { value: "critical", label: t("status:priority.critical"), icon: AlertTriangle, color: priorityColor.critical ?? priorityColorDefault },
+      { value: "high", label: t("status:priority.high"), icon: ArrowUp, color: priorityColor.high ?? priorityColorDefault },
+      { value: "medium", label: t("status:priority.medium"), icon: Minus, color: priorityColor.medium ?? priorityColorDefault },
+      { value: "low", label: t("status:priority.low"), icon: ArrowDown, color: priorityColor.low ?? priorityColorDefault },
+    ],
+    [t],
+  );
+  const executionWorkspaceModeOptions = useMemo(
+    () =>
+      [
+        { value: "shared_workspace", label: t("issues:workspaceMode.projectDefault") },
+        { value: "isolated_workspace", label: t("issues:workspaceMode.isolated") },
+        { value: "reuse_existing", label: t("issues:workspaceMode.reuse") },
+      ] as const,
+    [t],
+  );
   const { newIssueOpen, newIssueDefaults, closeNewIssue } = useDialog();
   const { companies, selectedCompanyId, selectedCompany } = useCompany();
   const queryClient = useQueryClient();
@@ -437,11 +449,11 @@ export function NewIssueDialog() {
         const prefix = (companies.find((company) => company.id === companyId)?.issuePrefix ?? "").trim();
         const issueRef = issue.identifier ?? issue.id;
         pushToast({
-          title: `Created ${issueRef} with upload warnings`,
-          body: `${failures.length} staged ${failures.length === 1 ? "file" : "files"} could not be added.`,
+          title: t("issues:toastCreatedWarningsTitle", { ref: issueRef }),
+          body: t("issues:toastStagedFilesFailed", { count: failures.length }),
           tone: "warn",
           action: prefix
-            ? { label: `Open ${issueRef}`, href: `/${prefix}/issues/${issueRef}` }
+            ? { label: t("issues:toastOpenIssue", { ref: issueRef }), href: `/${prefix}/issues/${issueRef}` }
             : undefined,
         });
       }
@@ -453,7 +465,7 @@ export function NewIssueDialog() {
 
   const uploadDescriptionImage = useMutation({
     mutationFn: async (file: File) => {
-      if (!effectiveCompanyId) throw new Error("No company selected");
+      if (!effectiveCompanyId) throw new Error(t("issues:noCompanySelected"));
       return assetsApi.uploadImage(effectiveCompanyId, file, "issues/drafts");
     },
   });
@@ -577,10 +589,10 @@ export function NewIssueDialog() {
 
     const validThinkingValues =
       assigneeAdapterType === "codex_local"
-        ? ISSUE_THINKING_EFFORT_OPTIONS.codex_local
+        ? issueThinkingEffortOptions.codex_local
         : assigneeAdapterType === "opencode_local"
-          ? ISSUE_THINKING_EFFORT_OPTIONS.opencode_local
-          : ISSUE_THINKING_EFFORT_OPTIONS.claude_local;
+          ? issueThinkingEffortOptions.opencode_local
+          : issueThinkingEffortOptions.claude_local;
     if (!validThinkingValues.some((option) => option.value === assigneeThinkingEffort)) {
       setAssigneeThinkingEffort("");
     }
@@ -748,8 +760,8 @@ export function NewIssueDialog() {
   }
 
   const hasDraft = title.trim().length > 0 || description.trim().length > 0 || stagedFiles.length > 0;
-  const currentStatus = statuses.find((s) => s.value === status) ?? statuses[1]!;
-  const currentPriority = priorities.find((p) => p.value === priority);
+  const currentStatus = statusOptions.find((s) => s.value === status) ?? statusOptions[1]!;
+  const currentPriority = priorityOptions.find((p) => p.value === priority);
   const currentAssignee = selectedAssigneeAgentId
     ? (agents ?? []).find((a) => a.id === selectedAssigneeAgentId)
     : null;
@@ -776,18 +788,18 @@ export function NewIssueDialog() {
   );
   const assigneeOptionsTitle =
     assigneeAdapterType === "claude_local"
-      ? "Claude options"
+      ? t("issues:agentOptionsClaude")
       : assigneeAdapterType === "codex_local"
-        ? "Codex options"
+        ? t("issues:agentOptionsCodex")
         : assigneeAdapterType === "opencode_local"
-          ? "OpenCode options"
-        : "Agent options";
+          ? t("issues:agentOptionsOpenCode")
+        : t("issues:agentOptionsGeneric");
   const thinkingEffortOptions =
     assigneeAdapterType === "codex_local"
-      ? ISSUE_THINKING_EFFORT_OPTIONS.codex_local
+      ? issueThinkingEffortOptions.codex_local
       : assigneeAdapterType === "opencode_local"
-        ? ISSUE_THINKING_EFFORT_OPTIONS.opencode_local
-      : ISSUE_THINKING_EFFORT_OPTIONS.claude_local;
+        ? issueThinkingEffortOptions.opencode_local
+      : issueThinkingEffortOptions.claude_local;
   const recentAssigneeIds = useMemo(() => getRecentAssigneeIds(), [newIssueOpen]);
   const assigneeOptions = useMemo<InlineEntityOption[]>(
     () => [
@@ -815,8 +827,7 @@ export function NewIssueDialog() {
   const savedDraft = loadDraft();
   const hasSavedDraft = Boolean(savedDraft?.title.trim() || savedDraft?.description.trim());
   const canDiscardDraft = hasDraft || hasSavedDraft;
-  const createIssueErrorMessage =
-    createIssue.error instanceof Error ? createIssue.error.message : "Failed to create issue. Try again.";
+  const createIssueErrorMessage = createIssue.error ? formatErrorForUser(createIssue.error) : null;
   const stagedDocuments = stagedFiles.filter((file) => file.kind === "document");
   const stagedAttachments = stagedFiles.filter((file) => file.kind === "attachment");
 
@@ -1136,7 +1147,7 @@ export function NewIssueDialog() {
                   }
                 }}
               >
-                {EXECUTION_WORKSPACE_MODES.map((option) => (
+                {executionWorkspaceModeOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -1331,7 +1342,7 @@ export function NewIssueDialog() {
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-36 p-1" align="start">
-              {statuses.map((s) => (
+              {statusOptions.map((s) => (
                 <button
                   key={s.value}
                   className={cn(
@@ -1365,7 +1376,7 @@ export function NewIssueDialog() {
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-36 p-1" align="start">
-              {priorities.map((p) => (
+              {priorityOptions.map((p) => (
                 <button
                   key={p.value}
                   className={cn(
@@ -1440,7 +1451,7 @@ export function NewIssueDialog() {
               {createIssue.isPending ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Creating issue...
+                  {t("issues:creatingIssue")}
                 </span>
               ) : createIssue.isError ? (
                 <span className="text-xs text-destructive">{createIssueErrorMessage}</span>
@@ -1455,7 +1466,7 @@ export function NewIssueDialog() {
             >
               <span className="inline-flex items-center justify-center gap-1.5">
                 {createIssue.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                <span>{createIssue.isPending ? "Creating..." : "Create Issue"}</span>
+                <span>{createIssue.isPending ? t("issues:creatingIssue") : t("issuesList:createIssue")}</span>
               </span>
             </Button>
           </div>

@@ -1,0 +1,49 @@
+{
+  "actor": {
+    "system": "システム",
+    "board": "ボード",
+    "someone": "誰か",
+    "agent": "エージェント {{id}}"
+  },
+  "issue": {
+    "ref": "課題 {{ref}}",
+    "fallbackRef": "課題 {{id}}"
+  },
+  "activity": {
+    "created": "{{actor}} が {{ref}} を作成しました",
+    "updated": "{{actor}} が {{ref}} を更新しました",
+    "commented": "{{actor}} が {{ref}} にコメントしました",
+    "commentedReopened": "{{actor}} が {{ref}} を再オープンしてコメントしました",
+    "commentedUpdated": "{{actor}} が {{ref}} にコメントして更新しました",
+    "viewIssue": "{{ref}} を表示"
+  },
+  "joinRequest": {
+    "titleAgent": "エージェントが参加を希望しています",
+    "titleSomeone": "誰かが参加を希望しています",
+    "body": "新しい参加リクエストが承認待ちです。",
+    "viewInbox": "受信箱を開く"
+  },
+  "agent": {
+    "started": "{{name}} が開始しました",
+    "errored": "{{name}} でエラーが発生しました",
+    "viewAgent": "エージェントを表示"
+  },
+  "run": {
+    "succeeded": "{{name}} の実行が成功しました",
+    "failed": "{{name}} の実行が失敗しました",
+    "timedOut": "{{name}} の実行がタイムアウトしました",
+    "cancelled": "{{name}} の実行がキャンセルされました",
+    "trigger": "トリガー: {{detail}}",
+    "viewRun": "実行を表示"
+  },
+  "issueUpdate": {
+    "status": "ステータス: {{value}}",
+    "priority": "優先度: {{value}}",
+    "reassigned": "担当を変更",
+    "unassigned": "未割当",
+    "reopened": "再オープン",
+    "reopenedFrom": "{{from}} から再オープン",
+    "titleChanged": "タイトルを変更",
+    "descriptionChanged": "説明を変更"
+  }
+}

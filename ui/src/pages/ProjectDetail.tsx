@@ -15,6 +15,7 @@ import { useCompany } from "../context/CompanyContext";
 import { useToast } from "../context/ToastContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
+import { formatErrorForUser } from "../lib/formatErrorForUser";
 import { ProjectProperties, type ProjectConfigFieldKey, type ProjectFieldSaveState } from "../components/ProjectProperties";
 import { CopyText } from "../components/CopyText";
 import { InlineEditor } from "../components/InlineEditor";
@@ -766,7 +767,7 @@ export function ProjectDetail() {
   }
 
   if (isLoading) return <PageSkeleton variant="detail" />;
-  if (error) return <p className="text-sm text-destructive">{error.message}</p>;
+  if (error) return <p className="text-sm text-destructive">{formatErrorForUser(error)}</p>;
   if (!project) return null;
 
   const handleTabChange = (tab: ProjectTab) => {

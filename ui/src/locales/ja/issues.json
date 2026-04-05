@@ -1,0 +1,25 @@
+{
+  "detailLoading": "読み込み中…",
+  "copiedToClipboard": "クリップボードにコピーしました",
+  "breadcrumb": "課題",
+  "selectCompany": "課題を表示するには会社を選択してください。",
+  "noMatchFilters": "現在のフィルターまたは検索に一致する課題はありません。",
+  "failedToLoad": "課題を読み込めませんでした",
+  "failedToCreate": "課題を作成できませんでした。もう一度お試しください。",
+  "newDialogTitle": "新しい課題",
+  "toastCreatedWarningsTitle": "課題 {{ref}} を作成しました（アップロード警告あり）",
+  "toastStagedFilesFailed": "{{count}} 件のファイルを追加できませんでした。",
+  "toastOpenIssue": "{{ref}} を開く",
+  "noCompanySelected": "会社が選択されていません",
+  "creatingIssue": "課題を作成中…",
+  "createIssueButton": "課題を作成",
+  "agentOptionsClaude": "Claude のオプション",
+  "agentOptionsCodex": "Codex のオプション",
+  "agentOptionsOpenCode": "OpenCode のオプション",
+  "agentOptionsGeneric": "エージェントのオプション",
+  "workspaceMode": {
+    "projectDefault": "プロジェクト既定",
+    "isolated": "新しい隔離ワークスペース",
+    "reuse": "既存ワークスペースを再利用"
+  }
+}

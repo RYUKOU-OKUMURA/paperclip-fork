@@ -1,0 +1,10 @@
+{
+  "breadcrumb": "見つかりません",
+  "title": "ページが見つかりません",
+  "titleInvalidCompany": "会社が見つかりません",
+  "description": "URL が間違っているか、ページが移動した可能性があります。",
+  "descriptionInvalidCompany": "プレフィックス「{{prefix}}」に一致する会社がありません。",
+  "requestedPath": "リクエストしたパス:",
+  "openDashboard": "ダッシュボードを開く",
+  "goHome": "ホームへ"
+}

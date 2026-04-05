@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DEFAULT_FEEDBACK_DATA_SHARING_TERMS_VERSION } from "@paperclipai/shared";
 import { useCompany } from "../context/CompanyContext";
@@ -16,6 +17,7 @@ import {
   ToggleField,
   HintIcon
 } from "../components/agent-config-primitives";
+import { formatErrorForUser } from "../lib/formatErrorForUser";
 
 type AgentSnippetInput = {
   onboardingTextUrl: string;
@@ -26,6 +28,7 @@ type AgentSnippetInput = {
 const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://paperclip.ing/tos";
 
 export function CompanySettings() {
+  const { t } = useTranslation("admin");
   const {
     companies,
     selectedCompany,
@@ -91,14 +94,14 @@ export function CompanySettings() {
     onSuccess: (_company, enabled) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
       pushToast({
-        title: enabled ? "Feedback sharing enabled" : "Feedback sharing disabled",
+        title: enabled ? t("companySettings.feedbackSharingEnabled") : t("companySettings.feedbackSharingDisabled"),
         tone: "success",
       });
     },
     onError: (err) => {
       pushToast({
-        title: "Failed to update feedback sharing",
-        body: err instanceof Error ? err.message : "Unknown error",
+        title: t("companySettings.feedbackUpdateFailedTitle"),
+        body: formatErrorForUser(err),
         tone: "error",
       });
     },
@@ -321,15 +324,12 @@ export function CompanySettings() {
                   )}
                   {(logoUploadMutation.isError || logoUploadError) && (
                     <span className="text-xs text-destructive">
-                      {logoUploadError ??
-                        (logoUploadMutation.error instanceof Error
-                          ? logoUploadMutation.error.message
-                          : "Logo upload failed")}
+                      {logoUploadError ?? formatErrorForUser(logoUploadMutation.error)}
                     </span>
                   )}
                   {clearLogoMutation.isError && (
                     <span className="text-xs text-destructive">
-                      {clearLogoMutation.error.message}
+                      {formatErrorForUser(clearLogoMutation.error)}
                     </span>
                   )}
                   {logoUploadMutation.isPending && (
@@ -392,9 +392,7 @@ export function CompanySettings() {
           )}
           {generalMutation.isError && (
             <span className="text-xs text-destructive">
-              {generalMutation.error instanceof Error
-                  ? generalMutation.error.message
-                  : "Failed to save"}
+              {formatErrorForUser(generalMutation.error)}
             </span>
           )}
         </div>
@@ -607,9 +605,7 @@ export function CompanySettings() {
             </Button>
             {archiveMutation.isError && (
               <span className="text-xs text-destructive">
-                {archiveMutation.error instanceof Error
-                  ? archiveMutation.error.message
-                  : "Failed to archive company"}
+                {formatErrorForUser(archiveMutation.error)}
               </span>
             )}
           </div>

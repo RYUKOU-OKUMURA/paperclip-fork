@@ -1,0 +1,33 @@
+{
+  "issue": {
+    "backlog": "バックログ",
+    "todo": "未着手",
+    "in_progress": "進行中",
+    "in_review": "レビュー中",
+    "done": "完了",
+    "cancelled": "キャンセル",
+    "blocked": "ブロック"
+  },
+  "priority": {
+    "critical": "緊急",
+    "high": "高",
+    "medium": "中",
+    "low": "低"
+  },
+  "project": {
+    "backlog": "バックログ",
+    "planned": "計画中",
+    "in_progress": "進行中",
+    "completed": "完了",
+    "cancelled": "キャンセル"
+  },
+  "thinking": {
+    "default": "既定",
+    "minimal": "最小",
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "xhigh": "超高",
+    "max": "最大"
+  }
+}
